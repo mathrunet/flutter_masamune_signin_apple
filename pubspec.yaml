@@ -1,7 +1,7 @@
 name: masamune_signin_apple
 description: >-
   Plugin for signing in with a Apple account.
-version: 0.1.0
+version: 0.1.0+1
 homepage: https://mathru.net
 repository: https://github.com/mathrunet/flutter_masamune_signin_apple
 
@@ -17,6 +17,7 @@ dependencies:
   # Auth
   apple_sign_in: ^0.1.0
   # Masamune
+  masamune_flutter: ^0.2.0
   masamune_firebase: ^0.2.0
 
 dev_dependencies:

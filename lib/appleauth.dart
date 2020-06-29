@@ -2,6 +2,21 @@ part of masamune.signin.apple;
 
 /// Sign in to Firebase using Apple SignIn.
 class AppleAuth {
+  /// Gets the options for the provider.
+  static const AuthProviderOptions options = const AuthProviderOptions(
+      id: "apple",
+      provider: _provider,
+      title: "Apple SignIn",
+      text: "Sign in with your Apple account.");
+  static Future<FirestoreAuth> _provider(
+      BuildContext context, Duration timeout) {
+    if (!Config.isIOS) {
+      Log.error("Not supported on non-IOS platforms.");
+      return Future.delayed(Duration.zero);
+    }
+    return signIn(timeout: timeout);
+  }
+
   /// Sign in to Firebase using Apple SignIn.
   ///
   /// [protorol]: Protocol specification.
