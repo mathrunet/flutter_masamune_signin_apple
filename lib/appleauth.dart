@@ -27,7 +27,7 @@ class AppleAuth {
         providerCallback: (timeout) async {
           AuthorizationResult result = await AppleSignIn.performRequests([
             AppleIdRequest(
-              requestedScopes: [Scope.fullName],
+              requestedScopes: [Scope.fullName, Scope.email],
               requestedOperation: OpenIdOperation.operationLogin,
             )
           ]);
