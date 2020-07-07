@@ -2,6 +2,18 @@ part of masamune.signin.apple;
 
 /// Sign in to Firebase using Apple SignIn.
 class AppleAuth {
+  /// Set options for authentication.
+  ///
+  /// [clientId]: Service ID created in Apple Developer Program.
+  /// [redirectUri]: The same redirect URL that you registered for your Service ID.
+  /// [PackageName] is replaced with the package name.
+  static void initialize(
+      {String clientId, String redirectUri, bool onlyIOS = false}) {
+    _onlyIOS = onlyIOS;
+    _clientId = clientId;
+    _redirectUri = redirectUri;
+  }
+
   /// Gets the options for the provider.
   static const AuthProviderOptions options = const AuthProviderOptions(
       id: "apple",
@@ -10,12 +22,20 @@ class AppleAuth {
       text: "Sign in with your Apple account.");
   static Future<FirestoreAuth> _provider(
       BuildContext context, Duration timeout) {
-    if (!Config.isIOS) {
+    if (_onlyIOS && !Config.isIOS) {
       Log.error("Not supported on non-IOS platforms.");
+      return Future.delayed(Duration.zero);
+    }
+    if (!_onlyIOS && (isEmpty(_clientId) || isEmpty(_redirectUri))) {
+      Log.error("Unable to read required information.");
       return Future.delayed(Duration.zero);
     }
     return signIn(timeout: timeout);
   }
+
+  static bool _onlyIOS = true;
+  static String _clientId;
+  static String _redirectUri;
 
   /// Sign in to Firebase using Apple SignIn.
   ///
@@ -25,29 +45,34 @@ class AppleAuth {
       {String protocol, Duration timeout = Const.timeout}) {
     return FirestoreAuth.signInWithProvider(
         providerCallback: (timeout) async {
-          AuthorizationResult result = await AppleSignIn.performRequests([
-            AppleIdRequest(
-              requestedScopes: [Scope.fullName, Scope.email],
-              requestedOperation: OpenIdOperation.operationLogin,
-            )
-          ]);
-          switch (result.status) {
-            case AuthorizationStatus.cancelled:
-              Log.error("Login canceled");
-              return Future.delayed(Duration.zero);
-            case AuthorizationStatus.error:
+          try {
+            PackageInfo info = await PackageInfo.fromPlatform();
+            final AuthorizationCredentialAppleID appleResult =
+                await SignInWithApple.getAppleIDCredential(
+                    scopes: [
+                  AppleIDAuthorizationScopes.email,
+                  AppleIDAuthorizationScopes.fullName,
+                ],
+                    webAuthenticationOptions: WebAuthenticationOptions(
+                      clientId: _clientId,
+                      redirectUri: Uri.parse(_redirectUri.replaceAll(
+                          "[PackageName]", info.packageName)),
+                    ));
+            if (appleResult != null &&
+                appleResult.authorizationCode != null &&
+                appleResult.identityToken != null) {
+              return OAuthProvider(providerId: "apple.com").getCredential(
+                  idToken: appleResult.identityToken,
+                  accessToken: appleResult.authorizationCode);
+            } else {
               Log.error(
-                  "Login terminated with error: ${result.error.localizedDescription}");
+                  "Login failed because the authentication information cannot be found.");
               return Future.delayed(Duration.zero);
-            default:
-              break;
+            }
+          } catch (e) {
+            Log.error(e.toString());
+            return Future.delayed(Duration.zero);
           }
-          OAuthProvider provider = OAuthProvider(providerId: "apple.com");
-          return provider.getCredential(
-            idToken: String.fromCharCodes(result.credential.identityToken),
-            accessToken:
-                String.fromCharCodes(result.credential.authorizationCode),
-          );
         },
         providerId: "apple.com",
         protocol: protocol,
