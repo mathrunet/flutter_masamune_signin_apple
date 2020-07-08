@@ -50,14 +50,17 @@ class AppleAuth {
             final AuthorizationCredentialAppleID appleResult =
                 await SignInWithApple.getAppleIDCredential(
                     scopes: [
-                  AppleIDAuthorizationScopes.email,
-                  AppleIDAuthorizationScopes.fullName,
-                ],
-                    webAuthenticationOptions: WebAuthenticationOptions(
-                      clientId: _clientId,
-                      redirectUri: Uri.parse(_redirectUri.replaceAll(
-                          "[PackageName]", info.packageName)),
-                    ));
+                      AppleIDAuthorizationScopes.email,
+                      AppleIDAuthorizationScopes.fullName,
+                    ],
+                    webAuthenticationOptions:
+                        (isNotEmpty(_clientId) && isNotEmpty(_redirectUri))
+                            ? WebAuthenticationOptions(
+                                clientId: _clientId,
+                                redirectUri: Uri.parse(_redirectUri.replaceAll(
+                                    "[PackageName]", info.packageName)),
+                              )
+                            : null);
             if (appleResult != null &&
                 appleResult.authorizationCode != null &&
                 appleResult.identityToken != null) {
