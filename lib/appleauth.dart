@@ -50,9 +50,9 @@ class AppleAuth {
             final AuthorizationCredentialAppleID appleResult =
                 await SignInWithApple.getAppleIDCredential(
                     scopes: [
-                      AppleIDAuthorizationScopes.email,
-                      AppleIDAuthorizationScopes.fullName,
-                    ],
+                  AppleIDAuthorizationScopes.email,
+                  AppleIDAuthorizationScopes.fullName,
+                ],
                     webAuthenticationOptions:
                         (isNotEmpty(_clientId) && isNotEmpty(_redirectUri))
                             ? WebAuthenticationOptions(
