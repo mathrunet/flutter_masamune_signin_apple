@@ -46,7 +46,8 @@ class AppleAuth {
     return FirestoreAuth.signInWithProvider(
         providerCallback: (timeout) async {
           try {
-            PackageInfo info = await PackageInfo.fromPlatform();
+            PackageInfo info =
+                await PackageInfo.fromPlatform().timeout(timeout);
             final AuthorizationCredentialAppleID appleResult =
                 await SignInWithApple.getAppleIDCredential(
                     scopes: [
