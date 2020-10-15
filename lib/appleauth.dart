@@ -65,7 +65,7 @@ class AppleAuth {
             if (appleResult != null &&
                 appleResult.authorizationCode != null &&
                 appleResult.identityToken != null) {
-              return OAuthProvider(providerId: "apple.com").getCredential(
+              return OAuthProvider("apple.com").credential(
                   idToken: appleResult.identityToken,
                   accessToken: appleResult.authorizationCode);
             } else {
